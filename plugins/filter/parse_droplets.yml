@@ -1,0 +1,11 @@
+DOCUMENTATION:
+  name: parse_droplets
+  short_description: Parse DO API response
+  description:
+    - Parse Digital Ocean response to return a list of dictionaries
+  positional: response
+
+RETURN:
+  _value:
+    description: List of dictionaries with droplet name and host
+    type: list

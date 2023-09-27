@@ -1,0 +1,20 @@
+---
+# Playbook: playbooks/inventory.yml
+# Description: List droplets in the training environment
+#
+# Usage:
+#
+#  # Group of servers
+#  ./bin/ansible-playbook playbooks/inventory.yml
+#
+- name: "List Training Environment Droplets"
+  hosts: "localhost"
+  gather_facts: false
+  become: false
+
+  tasks:
+
+    - name: "List all droplets"
+      ansible.builtin.debug:
+        msg: "{{ item }}.{{ dns.domain_name }}: {{ hostvars[item]['ansible_host'] }}"
+      with_items: "{{ groups[training_prefix] | default([]) }}"

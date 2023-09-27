@@ -1,0 +1,16 @@
+DOCUMENTATION:
+  name: do_keys_by_username
+  short_description: Dictionary with ssh keys by user
+  description:
+    - Parse a response from DigitalOcean and return keys by github usernames
+  positional: do_keys
+  options:
+    prefix:
+      description: Training prefix
+      type: str
+      required: true
+
+RETURN:
+  _value:
+    description: Dictionary with ssh keys by user
+    type: dict

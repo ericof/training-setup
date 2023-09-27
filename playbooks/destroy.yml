@@ -1,0 +1,54 @@
+---
+# Playbook: playbooks/destroy.yml
+# Description: Destroy Training Environment
+#
+# Usage:
+#
+#  # Group of servers
+#  ./bin/ansible-playbook playbooks/destroy.yml
+#
+- name: "Destroy Training Environment"
+  hosts: "localhost"
+  gather_facts: false
+  become: false
+  vars:
+    do_keys: []
+
+  tasks:
+
+    - name: "Digital Ocean: SSH Keys"
+      block:
+        - name: Gather information about DigitalOcean SSH keys
+          community.digitalocean.digital_ocean_sshkey_info:
+            oauth_token: "{{ lookup('ansible.builtin.env', 'DO_API_TOKEN') }}"
+          register: ssh_keys
+
+        - name: Set facts based on the gathered information
+          ansible.builtin.set_fact:
+            do_keys: "{{ do_keys + [item.fingerprint] }}"
+          loop: "{{ ssh_keys.data | community.general.json_query(ssh_pubkey) }}"
+          vars:
+            ssh_pubkey: "[?starts_with(name, '{{ training_prefix }}')]"
+
+    - name: "Cloudflare: Remove DNS entry"
+      community.general.cloudflare_dns:
+        zone: "{{ dns.domain_name }}"
+        state: absent
+        record: "{{ item }}"
+        api_token: "{{ lookup('ansible.builtin.env', 'CLOUDFLARE_TOKEN') }}"
+      with_items: "{{ groups[training_prefix] | default([]) }}"
+
+    - name: "Digital Ocean: Remove Droplet"
+      community.digitalocean.digital_ocean_droplet:
+        state: absent
+        oauth_token: "{{ lookup('ansible.builtin.env', 'DO_API_TOKEN') }}"
+        name: "{{ item }}"
+        unique_name: true
+      with_items: "{{ groups[training_prefix] | default([]) }}"
+
+    - name: "Digital Ocean: Remove SSH key"
+      community.digitalocean.digital_ocean_sshkey:
+        oauth_token: "{{ lookup('ansible.builtin.env', 'DO_API_TOKEN') }}"
+        fingerprint: "{{ item }}"
+        state: absent
+      with_items: "{{ do_keys }}"

@@ -1,0 +1,3 @@
+---
+dns:
+  domain_name: "{{ lookup('ansible.builtin.env', 'DOMAIN_NAME') }}"

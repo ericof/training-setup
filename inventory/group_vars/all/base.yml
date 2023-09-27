@@ -1,0 +1,2 @@
+---
+training_prefix: "{{ lookup('ansible.builtin.env', 'TRAINING_PREFIX') }}"

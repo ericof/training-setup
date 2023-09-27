@@ -1,0 +1,20 @@
+DOCUMENTATION:
+  name: get_ssh_keys
+  short_description: get ssh keys for a github username
+  description:
+    - Using Python's text object method C(split) we turn strings into lists via a 'splitting character'.
+  positional: username
+  options:
+    keys:
+      description: List of keys
+      type: list
+      required: true
+EXAMPLES: |
+
+    # raw_keys => [["ericof", ["ssh...", "ssh..."]], ]
+    raw_keys: "{{ 'ericof' | get_ssh_keys([]) }}"
+
+RETURN:
+  _value:
+    description: List of keys
+    type: list

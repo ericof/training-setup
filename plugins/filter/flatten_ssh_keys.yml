@@ -1,0 +1,20 @@
+DOCUMENTATION:
+  name: flatten_ssh_keys
+  short_description: Generate a list of all ssh keys
+  description:
+    - Using Python's text object method C(split) we turn strings into lists via a 'splitting character'.
+  positional: keys
+  options:
+    prefix:
+      description: Training prefix
+      type: str
+      required: true
+EXAMPLES: |
+
+    # raw_keys => [["ericof", "ssh..."], ["ericof", "ssh..."], ]
+    all_keys: "{{ [["ericof", ["ssh...", "ssh..."]], ] | flatten_ssh_keys() }}"
+
+RETURN:
+  _value:
+    description: List of keys
+    type: list
