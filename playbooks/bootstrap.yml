@@ -46,7 +46,7 @@
       community.digitalocean.digital_ocean_droplet:
         state: present
         oauth_token: "{{ lookup('ansible.builtin.env', 'DO_API_TOKEN') }}"
-        name: "{{ do_droplet.specs.name_prefix }}-{{ item }}"
+        name: "{{ do_droplet.specs.name_prefix }}-{{ item | lower  }}"
         size: "{{ do_droplet.specs.size }}"
         region: "{{ do_droplet.specs.region }}"
         image: "{{ do_droplet.specs.image }}"
@@ -67,7 +67,7 @@
         zone: "{{ dns.domain_name }}"
         state: present
         solo: true
-        record: "{{ item.name }}"
+        record: "{{ item.name | lower }}"
         type: A
         value: "{{ item.host }}"
         proxied: false
