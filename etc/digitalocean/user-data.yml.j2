@@ -1,0 +1,7 @@
+#cloud-config
+write_files:
+  - path: /etc/ssh/sshd_config.d/00-sshd-port.conf
+    content: |
+         Port {{ do_droplet.config.sshd_port }}
+runcmd:
+  - [service, ssh, restart]

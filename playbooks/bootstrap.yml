@@ -42,14 +42,24 @@
           ansible.builtin.set_fact:
             do_keys: "{{ _do_keys | do_keys_by_username(training_prefix) }}"
 
-    - name: "Create new Droplets"
-      community.digitalocean.digital_ocean_droplet:
-        state: present
+    - name: "Digital Ocean: Create new Project"
+      community.digitalocean.digital_ocean_project:
+        name: "{{ do_droplet.specs.project_name }}"
         oauth_token: "{{ lookup('ansible.builtin.env', 'DO_API_TOKEN') }}"
-        name: "{{ do_droplet.specs.name_prefix }}-{{ item | lower  }}"
+        state: "present"
+        description: "Project used for training"
+        purpose: "Website or blog"
+        environment: "Development"
+
+    - name: "Digital Ocean: Create new Droplets"
+      community.digitalocean.digital_ocean_droplet:
+        state: "present"
+        oauth_token: "{{ lookup('ansible.builtin.env', 'DO_API_TOKEN') }}"
+        name: "{{ do_droplet.specs.name_prefix }}-{{ item | lower }}"
         size: "{{ do_droplet.specs.size }}"
         region: "{{ do_droplet.specs.region }}"
         image: "{{ do_droplet.specs.image }}"
+        user_data: "{{ lookup('ansible.builtin.template', '../etc/digitalocean/user-data.yml.j2') }}"
         project_name: "{{ do_droplet.specs.project_name }}"
         tags: "{{ do_droplet.specs.tags }}"
         unique_name: true
@@ -62,7 +72,7 @@
       ansible.builtin.debug:
         msg: "{{ droplets | parse_droplets }}"
 
-    - name: Create a record using api token
+    - name: "Cloudflare: Create a record using api token"
       community.general.cloudflare_dns:
         zone: "{{ dns.domain_name }}"
         state: present

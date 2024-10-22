@@ -1,11 +1,13 @@
 ---
 do_droplet:
+  config:
+    sshd_port: 2222
   specs:
     name_prefix: "{{ training_prefix }}"
     size: s-1vcpu-1gb
     region: lon1
-    image: ubuntu-23-10-x64
-    project_name: "PloneConference2023"
+    image: ubuntu-24-10-x64
+    project_name: "PloneConference2024"
     tags:
       - "{{ training_prefix }}"
       - training

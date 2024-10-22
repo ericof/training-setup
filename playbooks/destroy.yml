@@ -50,5 +50,11 @@
       community.digitalocean.digital_ocean_sshkey:
         oauth_token: "{{ lookup('ansible.builtin.env', 'DO_API_TOKEN') }}"
         fingerprint: "{{ item }}"
-        state: absent
+        state: "absent"
       with_items: "{{ do_keys }}"
+
+    - name: "Digital Ocean: Remove Project"
+      community.digitalocean.digital_ocean_project:
+        name: "{{ do_droplet.specs.project_name }}"
+        oauth_token: "{{ lookup('ansible.builtin.env', 'DO_API_TOKEN') }}"
+        state: "absent"
