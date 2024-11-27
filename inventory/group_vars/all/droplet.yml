@@ -1,7 +1,7 @@
 ---
 do_droplet:
   config:
-    sshd_port: 2222
+    sshd_port: 22
   specs:
     name_prefix: "{{ training_prefix }}"
     size: s-1vcpu-1gb

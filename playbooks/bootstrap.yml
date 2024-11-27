@@ -67,6 +67,7 @@
         ssh_keys: "{{ do_keys[item] | map(attribute='id') | list }}"
       register: droplets
       with_items: "{{ students }}"
+      when: item in do_keys
 
     - name: "SSH Keys by GitHub username"
       ansible.builtin.debug:

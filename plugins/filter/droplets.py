@@ -6,6 +6,8 @@ def parse_droplets(response: dict) -> list:
     droplets = []
     for item in response.get("results", []):
         droplet = item.get("data", {}).get("droplet", {})
+        if "name" not in droplet:
+            continue
         name = droplet["name"]
         networks = droplet["networks"]["v4"]
         public_networks = [net for net in networks if net["type"] == "public"]
