@@ -7,7 +7,7 @@ do_droplet:
     size: s-1vcpu-1gb
     region: lon1
     image: ubuntu-24-10-x64
-    project_name: "PloneConference2024"
+    project_name: "Training"
     tags:
       - "{{ training_prefix }}"
       - training

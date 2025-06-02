@@ -1,0 +1,23 @@
+[project]
+name = "training-setup"
+version = "0.1.0"
+description = "Setup a training environment with Ansible"
+authors = [
+  { name = "Érico Andrei", email = "ericof@plone.org" }
+]
+readme = "README.md"
+requires-python = "==3.13.*"
+dependencies = [
+  "ansible==11.0.0",
+  "dnspython==2.7.0",
+  "python-dateutil==2.9.0",
+  "passlib==1.7.4",
+  "ansible-lint==24.10.0",
+  "jmespath",
+  "dnspython",
+  "requests",
+]
+
+[tool.uv]
+environments = ["platform_system != 'Windows'"]
+package = false

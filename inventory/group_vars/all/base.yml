@@ -1,2 +1,3 @@
 ---
 training_prefix: "{{ lookup('ansible.builtin.env', 'TRAINING_PREFIX') }}"
+project_name: "{{ lookup('ansible.builtin.env', 'PROJECT_NAME') }}"

@@ -8,9 +8,19 @@ GREEN=`tput setaf 2`
 RESET=`tput sgr0`
 YELLOW=`tput setaf 3`
 
+# Python checks
+UV?=uv
+
+# installed?
+ifeq (, $(shell which $(UV) ))
+  $(error "UV=$(UV) not found in $(PATH)")
+endif
+
+
 ROLES_DIR=roles
 MODULES_PATH=plugins
 LINT_PATH=inventory/* playbooks/*
+INSTALL_STAMP := .install.stamp
 
 .PHONY: all
 all: build
@@ -21,66 +31,61 @@ all: build
 help: ## This help message
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-bin/pip: ## Create Virtualenv
-	@echo "$(GREEN)==> Setup Virtual Env$(RESET)"
-	python3 -m venv .
-	bin/pip install pip --upgrade
+$(INSTALL_STAMP): pyproject.toml
+	@echo "🚀 Setting up devops"
+	@echo "- Create virtual environment"
+	@uv venv
+	@echo "- Installing dependencies"
+	@uv sync
+	@echo "- Install Ansible Roles and Collections"
+	@uv run ansible-galaxy install -r requirements.yml --force --no-deps
+	@touch $(INSTALL_STAMP)
 
-bin/black: bin/pip ## Install black
-	@echo "$(GREEN)==> Setup Black$(RESET)"
-	bin/pip install black
+.PHONY: install
+install: $(INSTALL_STAMP) ## Install dependencies and roles
 
-.PHONY: build
-build: bin/pip ## Setup Ansible
-	@echo "$(GREEN)==> Setup Virtual Env$(RESET)"
-	bin/pip install -r requirements/requirements.txt --upgrade
-	# Install Roles
-	bin/ansible-galaxy install -r requirements/roles.yml --force --no-deps -p $(ROLES_DIR)
-	# Install Collections
-	bin/ansible-galaxy collection install -r requirements/collections.yml
 
 .PHONY: clean
 clean: ## Remove virtualenv and downloaded roles
-	@echo "Clean"
-	rm -rf bin lib lib64 include pyvenv.cfg roles/*
+	@echo "🚀 Cleanup the current environment"
+	@rm -rf $(INSTALL_STAMP) .venv roles/*
 
 .PHONY: format
-format: bin/black ## Format modules
+format: $(INSTALL_STAMP) ## Format modules
 	@echo "$(GREEN)==> Format ansible modules$(RESET)"
-	./bin/black ${MODULES_PATH}
+	@uvx ruff@latest check --select I --fix --config $(BACKEND_FOLDER)/pyproject.toml
 
-.PHONY: lint-black
-lint-black: bin/black ## Lint Ansible modules
+.PHONY: lint-ruff
+lint-ruff: $(INSTALL_STAMP) ## Lint Ansible modules
 	@echo "$(GREEN)==> Lint ansible modules$(RESET)"
-	./bin/black ${MODULES_PATH} --check
+	@uvx ruff@latest check --fix --config $(BACKEND_FOLDER)/pyproject.toml
 
 .PHONY: lint-ansible
-lint-ansible: bin/ansible-lint ## Lint playbooks
+lint-ansible: $(INSTALL_STAMP) ## Lint playbooks
 	@echo "$(GREEN)==> Lint ansible files$(RESET)"
-	./bin/ansible-lint ${LINT_PATH}
+	@uv run ansible-lint ${LINT_PATH}
 
 .PHONY: lint
-lint: ## Lint Codebase
+lint: $(INSTALL_STAMP) ## Lint Codebase
 	@echo "$(GREEN)==> Lint kitconcept-server codebase$(RESET)"
 	make lint-ansible
-	make lint-black
+	make lint-ruff
 
 # Manage Environment
--include .env
+include .env
 export
 
 .PHONY: create-environment
-create-environment: bin/ansible  ## Create training environment
+create-environment: $(INSTALL_STAMP) ## Create training environment
 	@echo "$(GREEN)==> Create training environment$(RESET)"
-	./bin/ansible-playbook playbooks/bootstrap.yml
-
+	@uv run ansible-playbook playbooks/bootstrap.yml
 
 .PHONY: list-environment
-list-environment: bin/ansible  ## List training environment inventory
+list-environment: $(INSTALL_STAMP)  ## List training environment inventory
 	@echo "$(GREEN)==> List training environment$(RESET)"
-	./bin/ansible-playbook playbooks/inventory.yml
+	@uv run ansible-playbook playbooks/inventory.yml
 
 .PHONY: destroy-environment
-destroy-environment: bin/ansible  ## Destroy training environment
+destroy-environment: $(INSTALL_STAMP)  ## Destroy training environment
 	@echo "$(GREEN)==> Destroy training environment$(RESET)"
-	./bin/ansible-playbook playbooks/destroy.yml
+	@uv run ansible-playbook playbooks/destroy.yml
